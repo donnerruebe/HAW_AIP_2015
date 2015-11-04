@@ -1,0 +1,43 @@
+Flug-API:
+
+
+flight/(ID): [GET/POST/DELETE]
+request:
+response:{
+        id:1234567890,
+        flightId:"RA1337",
+        departure:{location:"TXL",time:"2016.02.31 12:37"},
+        destination:{location:"HAM",time:"2016.02.31 13:37"},
+        plane:{
+        id:1234
+        call:"D-XKY",
+        company:"Boing",
+        class:"737",
+        type:"737-800",
+        length:400m,
+        width:500m,
+        fuelcapacity:2000,
+        minRunway:"2000m",
+        capacity:{passenger:81,crew:3,cabin-crew:10,cargo:"12"},
+        },
+        crewId:1234,
+    }
+    
+search/: [POST]
+....
+
+registerCrew/(crewId)/(flightId)
+
+flightstatus/(flightId):[GET]
+    {
+        status:(pre/boarding/ready/start/flight/land/unload/post/cancel),
+        delay:(-1000/1000),
+        estimated:"2016.02.31 13:31"
+    }
+    
+planePosition/(planeId):
+    {
+        geo:{lon,lat},
+        station:"HAM" // HAM-LHT <-auch Wartungshallen
+        
+    }
