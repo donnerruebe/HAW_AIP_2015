@@ -1,0 +1,232 @@
+swagger: '2.0'
+info:
+  description: Api Documentation for our Flight search proxy service.
+  version: '1.0'
+  title: Dokumentation der FlightOpAPI
+basePath: /flights/
+paths:
+  /flights/{flightID}:
+    parameters:
+    - name: flightID
+      in: path
+      description: ID des Flug-Datensatzes 
+      type: integer
+      required: true
+    get:
+      description: Lesen eines Flugdatensatzes. 
+      responses:
+        '200':
+          description: OK
+          schema:
+              $ref: '#/definitions/Flight'
+
+
+
+  /flights/search:
+    get:
+      summary: Suche nach flügen mit spezifizierten Eigenschaften
+      description: Übergeben wird das teilausgefüllte Flugobjekt. Die spezifizierten Parameter bilden den FIlter zur Selektion der Flug-IDs.
+      #produces:
+      #  - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Teilweise gefülltes Flugobjekt zum FIltern der vorhandenen Datensätze
+          required: false
+          schema:
+              $ref: '#/definitions/Flight'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            description: Liste der Flug-IDs
+            items:
+              type: integer
+
+  /flights/{flightID}/registercrew:
+    parameters:
+    - name: flightID
+      in: path
+      description: Flug-ID
+      type: integer
+      required: true
+    - name: crewID
+      in: body
+      required: true
+      schema:
+        type: integer
+        description: Crew-ID als integerZahl (Zum Löschen wird -1 übergeben)
+        example: 12918
+    post:
+      description: Nach erfolgreichem Zuweisen der Crew-ID als Referenz auf einen bestimmten Flug
+      responses:
+        '200':
+          description: OK
+
+
+
+  /flights/{flightID}/flightstatus:
+    parameters:
+    - name: flightID
+      in: path
+      description: ID of the Flight
+      type: integer
+      required: true  
+    get:
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Flightstatus'
+            
+  /flights/{flightID}/flightposition:
+    parameters:
+    - name: flightID
+      in: path
+      description: ID of the Flight
+      type: integer
+      required: true  
+    get:
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Flightposition'
+  
+          
+definitions:
+  Flight:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int128
+        description: Eindeutiger Datensatz Identifier für Flugdatensätze.
+      flightNumber:
+        type: string
+        description: int. Flugkennung
+        example: 'STE-1338'
+      airline:
+        type: string
+        description: Name des Fluganbieters
+        example: 'StenkelAIR'
+      departure:
+        $ref: '#/definitions/flightSchedule'
+      destination:
+        $ref: '#/definitions/flightSchedule'
+        
+      plane:
+        $ref: '#/definitions/plane'
+      
+      crewId:
+        type: integer
+        description: ID des Datensatzes in CrewService. Wenn nicht gesetzt oder wieder gelöscht wird der WERT -1 eingetragen.
+        example: 'WTF123'
+        
+  flightSchedule:
+    type: object
+    properties:
+      location: 
+        type: string
+      scheduled:
+        type: string
+        format: date-time
+        description: Javascript Iso-Timestamp '2012-04-23T18:25:43.511Z'
+
+  plane:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: ReferenzID des Flugzeugs
+      call:
+        type: string
+        example: 'D-XKY'
+        description: RadioCall des Flugzeugs
+      company:
+        type: string
+        example: 'BOEING'
+        description: Hersteller des FLugzeugs
+      planeclass:
+        type: string
+        example: '737'
+        description: Flugzeugklasse
+      planetype:
+        type: string
+        example: '737-800'
+        description: Flugzeugart
+      planeLength:
+        type: integer
+        example: 418
+        description: Länge des Flugzeugs in METERN
+      planeWidth:
+        type: integer
+        example: 418
+        description: Breite des Flugzeugs
+      fuelCapacity:
+        type: integer
+        example: 20000
+        description: Treibstoff-Fassungsvermögen (Gallonen)
+      minRunway:
+        type: integer
+        example: 12345
+        description: Mindestlänge für Start und Landebahn in Metern
+      capacity:
+        $ref: '#/definitions/planeCapacity'
+        
+  planeCapacity:
+    type: object
+    properties:
+      passenger:
+        $ref: '#/definitions/passengerClass'
+      crew:
+        type: integer
+        description: Anzahl der zu besetzende Flugcrew
+      cabincrew:
+        type: integer
+        description: Anzahl der zu besetzende Flugbegleiter*innen
+      cargo:
+        type: integer
+        description: Anzahl der Verfügbaren Cargoeinheiten
+  
+  passengerClass:
+    type: object
+    properties:
+      firstclass: 
+        type: integer
+        description: Anzahl der verfügbaren Plätze in der First-Klasse
+      bussinessclass: 
+        type: integer
+        description: Anzahl der verfügbaren Plätze in der Bussiness-Klasse
+      economyclass: 
+        type: integer
+        description: Anzahl der verfügbaren Plätze in der Economy-Klasse
+        
+  Flightstatus:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Mögliche Zustäde (pre/boarding/ready/start/flight/land/unload/post/maintenece/cancel)
+      delayed:
+        type: integer
+        description: Verspätung des Flugs aktuell in [min.]
+      estimated:
+        type: string
+        format: date-time
+        description: Javascript Iso-Timestamp '2012-04-23T18:25:43.511Z'
+        
+  Flightposition:
+    type: object
+    properties:
+      longitude:
+        type: string
+        description: Aktuelle Position des Flugs
+      latitude:
+        type: string
+        description: Aktuelle Position des Flugzeug
+      station:
+        type: string
+        description: Falls verfügbar werden Flughäfen angegeben (Start / Landung) 
+  
